@@ -28,13 +28,20 @@ use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
 
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceInterface;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Middleware\AuthenticationMiddleware;
+use Psr\Http\Message\ServerRequestInterface;
+
 /**
  * Application setup class.
  *
  * This defines the bootstrapping logic and middleware layers you
  * want to use in your application.
  */
-class Application extends BaseApplication
+class Application extends BaseApplication 
+    implements AuthenticationServiceProviderInterface
 {
     /**
      * Load all the application configuration and bootstrap logic.
@@ -64,6 +71,7 @@ class Application extends BaseApplication
         }
 
         // Load more plugins here
+        $this->addPlugin('Authentication');
     }
 
     /**
@@ -101,7 +109,12 @@ class Application extends BaseApplication
             // https://book.cakephp.org/4/en/controllers/middleware.html#cross-site-request-forgery-csrf-middleware
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,
-            ]));
+            ]))
+            
+            // ... autres middlewares ajoutés auparavant
+            ->add(new RoutingMiddleware($this))
+            // ajoutez Authentication après RoutingMiddleware
+            ->add(new AuthenticationMiddleware($this));;
 
         return $middlewareQueue;
     }
@@ -132,5 +145,44 @@ class Application extends BaseApplication
         $this->addPlugin('Migrations');
 
         // Load more plugins here
+    }
+
+    public function getAuthenticationService(ServerRequestInterface $request): AuthenticationServiceInterface
+    {
+        $authenticationService = new AuthenticationService([
+            'unauthenticatedRedirect' => '/client/login',
+            'queryParam' => 'redirect',
+        ]);
+
+        // Charger les identificateurs. S'assurer que nous vérifions les champs email et password
+        $authenticationService->loadIdentifier('Authentication.Password', [
+            'fields' => [
+                'username' => 'login_client',
+                'password' => 'mdp_client',
+            ],
+            'resolver' => [
+                'className' => 'Authentication.Orm',
+                'userModel' => 'Client'
+            ],
+        ]);
+
+        // Charger les authentificateurs. En général vous voudrez mettre Session en premier.
+        $authenticationService->loadAuthenticator('Authentication.Session');
+        // Configurer la connexion par formulaire pour qu'elle aille chercher
+        // les champs email et password.
+        $authenticationService->loadAuthenticator('Authentication.Form', [
+            'fields' => [
+                'username' => 'login_client',
+                'password' => 'mdp_client',
+            ],
+            'loginUrl' => '/client/login',
+        ]);
+        /*$this->Authentication->config('authenticate', [
+            AuthComponent::ALL => ['userModel' => 'Client'],
+            'Basic',
+            'Form'
+        ]);*/
+
+        return $authenticationService;
     }
 }
