@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use phpDocumentor\Reflection\DocBlock\Tags\Var_;
-
 class ClientController extends AppController {
 
     public function beforeFilter(\Cake\Event\EventInterface $event)

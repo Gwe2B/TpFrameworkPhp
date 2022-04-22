@@ -27,8 +27,6 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
     </title>
     <?= $this->Html->meta('icon') ?>
 
-    <link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet">
-
     <?= $this->Html->css(['semantic.min']) ?>
     <?= $this->Html->script(['semantic.min']) ?>
 
@@ -38,17 +36,32 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
 </head>
 <body>
     <header class="ui secondary menu">
-        <a href="<?= $this->Url->build('/') ?>" class="active item">
-            <i class="home icon"></i> Home
-        </a>
-    </header>
-    <main class="main">
-        <div class="container">
-            <?= $this->Flash->render() ?>
-            <?= $this->fetch('content') ?>
+        <div class="ui fixed inverted menu">
+            <div class="ui container">
+            <a href="#" class="header item">
+                <img class="logo" src="assets/images/logo.png">
+                TP Framework CakePhp
+            </a>
+            </div>
+            </div>
         </div>
+    </header>
+    <main class="ui container">
+        <?= $this->Flash->render() ?>
+        <?= $this->fetch('content') ?>
     </main>
     <footer>
+    <div class="ui inverted vertical footer segment">
+        <div class="ui inverted section divider"></div>
+        <img src="assets/images/logo.png" class="ui centered mini image">
+        <div class="ui horizontal inverted small divided link list">
+            <a class="item" href="#">Site Map</a>
+            <a class="item" href="#">Contact Us</a>
+            <a class="item" href="#">Terms and Conditions</a>
+            <a class="item" href="#">Privacy Policy</a>
+        </div>
+        </div>
+    </div>
     </footer>
 </body>
 </html>
